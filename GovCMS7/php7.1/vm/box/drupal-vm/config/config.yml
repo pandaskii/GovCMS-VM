@@ -1,0 +1,100 @@
+vagrant_box:                    geerlingguy/ubuntu1604
+vagrant_hostname:               govcms7.test
+vagrant_machine_name:           govcms7vm
+vagrant_ip:                     0.0.0.0
+
+vagrant_synced_folders:
+  - local_path:                 .
+    destination:                /var/www/drupalvm
+    type:                       nfs
+    create:                     true
+
+# Memory and CPU to use for this VM.
+vagrant_memory:                 2048
+vagrant_cpus:                   2
+
+vagrant_plugins:
+  - name:                       vagrant-vbguest
+  - name:                       vagrant-hostsupdater
+  - name:                       vagrant-auto_network
+
+drupal_build_makefile:          true
+
+drupal_build_composer:          false
+drupal_build_composer_project:  false
+
+drupal_install_site:            true
+
+# Required Drupal settings.
+drupal_core_path:               "/var/www/drupalvm/docroot"
+drupal_db_user:                 govcms
+drupal_db_password:             govcms
+drupal_db_name:                 govcms_govcms7
+drupal_db_host:                 localhost
+
+drupal_major_version:           7
+drupal_site_name:               "govCMS7"
+drupal_install_profile:         govcms
+
+drush_launcher_install:         no
+drush_install_from_source:      yes
+drush_source_install_version:   "8.1.16"
+
+drupalvm_cron_jobs:
+  - name:                       "Drupal Cron"
+    minute:                     "*/30"
+    job:                        "{{ drush_path }} -r {{ drupal_core_path }} core-cron"
+
+configure_drush_aliases:        true
+
+installed_extras:
+  - drush
+  - mailhog
+  #- memcached
+  #- solr
+  - upload-progress
+  - xdebug
+
+extra_packages:
+  - clamav
+  - htop
+  - imagemagick
+
+php_version:                    "7.1"
+php_packages_extra:
+  - "php{{ php_version }}-bz2"
+  - "php{{ php_version }}-imagick"
+  - "php{{ php_version }}-zip"
+
+php_upload_max_filesize:        "150M"
+php_date_timezone:              "Australia/Canberra"
+php_memory_limit:               "512M"
+
+# XDebug configuration. XDebug is disabled by default for better performance.
+php_xdebug_version:             2.5.0
+php_xdebug_default_enable:      0
+php_xdebug_coverage_enable:     0
+php_xdebug_cli_enable:          1
+php_xdebug_remote_enable:       1
+php_xdebug_remote_connect_back: 1
+# Use PHPSTORM for PHPStorm
+php_xdebug_idekey:              PHPSTORM
+php_xdebug_max_nesting_level:   256
+php_xdebug_remote_host:         "{{ ansible_default_ipv4.gateway }}"
+
+# Acquia Search defaults to 4.5.1.
+solr_version:                   "4.5.1"
+
+# Solr Configuration.
+solr_xms:                       "128M"
+solr_xmx:                       "256M"
+
+# Other configuration.
+ssh_home:                       "{{ drupal_core_path }}"
+
+# Scripts.
+pre_provision_scripts:
+  - "../../../../box/drupal-vm/scripts/pre.sh"
+post_provision_scripts:
+  #- "../../../../box/drupal-vm/scripts/solr.sh"
+  - "../../../../box/drupal-vm/scripts/post.sh"
